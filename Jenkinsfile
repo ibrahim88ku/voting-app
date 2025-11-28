@@ -60,7 +60,7 @@ pipeline {
                 """
             }
         }
-        */
+        
 
         stage('Deploy to Staging') {
             steps {
@@ -70,6 +70,19 @@ pipeline {
                     kubectl apply -f ~/k8s/frontend-deployment.yaml -n staging;
                 "
                 """
+            }
+        }
+        */
+
+        stage('Deploy to Staging') {
+            steps {
+                sshagent(credentials: ['k8s-ssh']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no k8s@10.10.10.32 \
+                    "kubectl apply -f ~/k8s/backend-deployment.yaml -n staging && \
+                    kubectl apply -f ~/k8s/frontend-deployment.yaml -n staging"
+                    '''
+                }
             }
         }
 
