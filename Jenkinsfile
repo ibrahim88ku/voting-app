@@ -14,6 +14,8 @@ pipeline {
             }
         }
 
+        // TODO: enable SonarQube later with SonarScanner (not Maven)
+        /*
         stage('SonarQube Scan') {
             steps {
                 script {
@@ -23,6 +25,7 @@ pipeline {
                 }
             }
         }
+        */
 
         stage('Build Docker Images') {
             steps {
