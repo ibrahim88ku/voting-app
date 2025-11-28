@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>Voting App</title></head>
+<body>
+<h1>Voting App</h1>
+<button onclick="vote('cats')">Vote Cats</button>
+<button onclick="vote('dogs')">Vote Dogs</button>
+<p id="result"></p>
+<script>
+async function vote(animal){
+  let r=await fetch("http://localhost:5000/vote/"+animal);
+  let t=await r.text();
+  document.getElementById("result").innerText=t;
+}
+</script>
+</body>
+</html>
