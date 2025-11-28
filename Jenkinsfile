@@ -52,6 +52,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Deploy to Staging') {
             steps {
                 sh """
@@ -59,6 +60,19 @@ pipeline {
                 """
             }
         }
+        */
+
+        stage('Deploy to Staging') {
+            steps {
+                sh """
+                ssh k8s@10.10.10.32 "
+                    kubectl apply -f ~/k8s/backend-deployment.yaml -n staging;
+                    kubectl apply -f ~/k8s/frontend-deployment.yaml -n staging;
+                "
+                """
+            }
+        }
+
 
         stage('Manual Approval for Production') {
             steps {
