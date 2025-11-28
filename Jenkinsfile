@@ -99,10 +99,19 @@ pipeline {
 
         stage('Deploy to Production') {
             steps {
-                sh """
-                kubectl --kubeconfig=${MINIKUBE_KUBECONFIG} apply -f k8s/production/
-                """
+                withCredentials([
+                    sshUserPrivateKey(credentialsId: 'k8s-ssh',
+                                    keyFileVariable: 'SSH_KEY',
+                                    usernameVariable: 'SSH_USER')
+                ]) {
+                    sh '''
+                    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "$SSH_USER"@10.10.10.32 \
+                    "kubectl apply -f ~/k8s/backend-deployment.yaml -n production && \
+                    kubectl apply -f ~/k8s/frontend-deployment.yaml -n production"
+                    '''
+                }
             }
         }
+
     }
 }
