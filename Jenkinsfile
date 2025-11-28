@@ -9,8 +9,8 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/YOURUSER/voting-app.git'
+                git branch: 'master',
+                    url: 'https://github.com/ibrahim88ku/voting-app.git'
             }
         }
 
