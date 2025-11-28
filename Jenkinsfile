@@ -2,7 +2,12 @@ pipeline {
     agent any
 
     environment {
+        // dockerhub is a "Username with password" credential
         DOCKERHUB = credentials('dockerhub')
+
+        // minikube-kubeconfig should be a "Secret file" credential
+        // that contains your kubeconfig
+        MINIKUBE_KUBECONFIG = credentials('minikube-kubeconfig')
     }
 
     stages {
@@ -20,7 +25,8 @@ pipeline {
             steps {
                 script {
                     withSonarQubeEnv('Sonar-Server') {
-                        sh 'mvn clean verify sonar:sonar'
+                        // This only works for Maven projects with pom.xml
+                        // sh 'mvn clean verify sonar:sonar'
                     }
                 }
             }
@@ -29,28 +35,28 @@ pipeline {
 
         stage('Build Docker Images') {
             steps {
-                sh '''
-                docker build -t youruser/vote-frontend:latest frontend/
-                docker build -t youruser/vote-backend:latest backend/
-                '''
+                sh """
+                docker build -t ${DOCKERHUB_USR}/vote-frontend:latest frontend/
+                docker build -t ${DOCKERHUB_USR}/vote-backend:latest backend/
+                """
             }
         }
 
         stage('Push Docker Images') {
             steps {
-                sh '''
-                echo "$DOCKERHUB_PSW" | docker login -u "$DOCKERHUB_USR" --password-stdin
-                docker push youruser/vote-frontend:latest
-                docker push youruser/vote-backend:latest
-                '''
+                sh """
+                echo "${DOCKERHUB_PSW}" | docker login -u "${DOCKERHUB_USR}" --password-stdin
+                docker push ${DOCKERHUB_USR}/vote-frontend:latest
+                docker push ${DOCKERHUB_USR}/vote-backend:latest
+                """
             }
         }
 
         stage('Deploy to Staging') {
             steps {
-                sh '''
-                kubectl --kubeconfig=/var/lib/jenkins/kubeconfigs/minikube apply -f k8s/staging/
-                '''
+                sh """
+                kubectl --kubeconfig=${MINIKUBE_KUBECONFIG} apply -f k8s/staging/
+                """
             }
         }
 
@@ -62,9 +68,9 @@ pipeline {
 
         stage('Deploy to Production') {
             steps {
-                sh '''
-                kubectl --kubeconfig=/var/lib/jenkins/kubeconfigs/minikube apply -f k8s/production/
-                '''
+                sh """
+                kubectl --kubeconfig=${MINIKUBE_KUBECONFIG} apply -f k8s/production/
+                """
             }
         }
     }
