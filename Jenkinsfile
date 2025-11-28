@@ -76,9 +76,13 @@ pipeline {
 
         stage('Deploy to Staging') {
             steps {
-                sshagent(credentials: ['k8s-ssh']) {
+                withCredentials([
+                    sshUserPrivateKey(credentialsId: 'k8s-ssh',
+                                    keyFileVariable: 'SSH_KEY',
+                                    usernameVariable: 'SSH_USER')
+                ]) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no k8s@10.10.10.32 \
+                    ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "$SSH_USER"@10.10.10.32 \
                     "kubectl apply -f ~/k8s/backend-deployment.yaml -n staging && \
                     kubectl apply -f ~/k8s/frontend-deployment.yaml -n staging"
                     '''
